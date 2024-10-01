@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disney Toon Ton</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+        #start-page, #game-page {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        #loading-page {
+    display: none; /* ابتدا پنهان است */
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* برای پر کردن کل صفحه */
+    flex-direction: column;
+    position: absolute; /* این باعث می‌شود که صفحه لودینگ روی دیگر عناصر قرار گیرد */
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 20; /* بالاتر از بقیه عناصر */
+}
+
+.energy-bar-container {
+    margin-top: 20px;
+    width: 150px;
+    height: 20px;
+    background-color: #ddd;
+    border-radius: 15px;
+    position: relative;
+}
+
+.energy-bar {
+    height: 100%;
+    border-radius: 15px;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+        #start-page.active, #game-page.active {
+            display: flex;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .tab-bar {
+            display: flex;
+            justify-content: space-around;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 10;
+        }
+        .tab {
+            flex-grow: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .tab:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .content {
+            display: none;
+            padding: 20px;
+            flex-grow: 1;
+            position: relative;
+            text-align: center;
+        }
+        .content.active {
+            display: block;
+        }
+        .avatar {
+            position: absolute; /* تغییر به absolute */
+            top: 20px; /* فاصله از بالا */
+            left: 20px; /* فاصله از چپ */
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            background-color: #ccc;
+            background-image: url('https://via.placeholder.com/80');
+            background-size: cover;
+            z-index: 10; /* بالاتر از بقیه عناصر */
+        }
+        .level {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .bottom-info {
+            position: absolute;
+            bottom: 60px; /* فاصله از پایین */
+            left: 10px; /* فاصله از چپ */
+            display: flex;
+            align-items: center;
+            z-index: 5;
+            gap: 15px; /* فاصله بین عناصر */
+        }
+        .energy-bar-container {
+            width: 150px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 15px;
+            position: relative;
+        }
+        .energy-bar {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        .points, .referral-points {
+            font-size: 16px;
+            margin-right: 15px;
+        }
+        .energy-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .point-popup {
+            position: absolute;
+            color: green;
+            font-size: 20px;
+            animation: fadeOut 1.5s forwards;
+        }
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+        .level-up-container {
+            width: 150px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 15px;
+            position: relative;
+            margin-top: 10px;
+        }
+        .level-up-bar {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.3s;
+            background-color: gold; /* رنگ نوار لول آپ */
+        }
+        .level-up-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        /* استایل برای جدول */
+        .friends-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .friends-table th, .friends-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .friends-table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .copy-button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- صفحه استارت -->
+    <div id="start-page" class="active">
+        <button id="start-btn">Start</button>
+    </div>
+
+    <div id="loading-page">
+        <div>Loading...</div>
+        <div class="energy-bar-container">
+            <div class="energy-bar" id="loading-bar" style="width: 0%; background-color: green;"></div>
+        </div>
+    </div>
+    
+    <!-- صفحه بازی -->
+    <div id="game-page">
+        <div class="content" id="game-tab" onclick="incrementPoints(event)">
+            <div class="avatar" id="user-avatar"></div>
+            <div class="level" id="user-level">Level: 1</div>
+
+            <div class="bottom-info">
+                <div class="energy-bar-container">
+                    <div class="energy-bar" id="energy-bar" style="width: 100%; background-color: green;"></div>
+                    <div class="energy-text" id="energy-text">1000/1000</div>
+                </div>
+                <div class="points" id="points-display">Points: 0</div>
+                <div class="referral-points" id="referral-points-display">Referral Points: 0</div>
+            </div>
+
+            <div class="level-up-container">
+                <div class="level-up-bar" id="level-up-bar" style="width: 0%;"></div>
+                <div class="level-up-text" id="level-up-text">Level Up: 0%</div>
+            </div>
+
+            <h1>Game</h1>
+        </div>
+        <div class="content" id="tasks-tab">
+            <h1>Tasks</h1>
+            <ul>
+                <li><a href="https://www.youtube.com" target="_blank">YouTube</a></li>
+                <li><a href="https://t.me/yourchannel" target="_blank">Telegram</a></li>
+                <li><a href="https://www.instagram.com" target="_blank">Instagram</a></li>
+                <li><a href="https://twitter.com" target="_blank">X (Twitter)</a></li>
+            </ul>
+        </div>
+        <div class="content" id="friends-tab">
+            <h1>Friends</h1>
+            <table class="friends-table">
+                <thead>
+                    <tr>
+                        <th>Friend</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Friend 1</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>Friend 2</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td>Friend 3</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <p>Your Referral Link: <span id="referral-link">https://example.com/referral</span></p>
+                <button class="copy-button" id="copy-referral-btn">Copy Referral Link</button>
+            </div>
+        </div>
+        <div class="content" id="comingsoon-tab">
+            <h1>Coming Soon</h1>
+            <p>More features are on the way!</p>
+        </div>
+
+        <div class="tab-bar">
+            <div class="tab" data-tab="game-tab">Game</div>
+            <div class="tab" data-tab="tasks-tab">Tasks</div>
+            <div class="tab" data-tab="friends-tab">Friends</div>
+            <div class="tab" data-tab="comingsoon-tab">Coming Soon</div>
+        </div>
+    </div>
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const startPage = document.getElementById('start-page');
+        const loadingPage = document.getElementById('loading-page');
+        const gamePage = document.getElementById('game-page');
+        const tabs = document.querySelectorAll('.tab');
+        const contents = document.querySelectorAll('.content');
+        const copyReferralBtn = document.getElementById('copy-referral-btn');
+        let points = 0;
+        let clickCount = 0; // شمارش کلیک‌ها
+        const bonusClickThreshold = 5; // هر 5 کلیک یک امتیاز اضافی
+        let referralPoints = 0;
+        let energy = 1000;
+        let levelUpPoints = 1000;
+        let currentLevel = 1;
+        let levelUpProgress = 0;
+    
+        startBtn.addEventListener('click', () => {
+    console.log("Start button clicked"); // اضافه کردن این خط
+    startPage.classList.remove('active');
+    loadingPage.classList.add('active'); // نمایش صفحه لودینگ
+    loadingPage.style.display = 'flex';
+    let loadingBar = document.getElementById('loading-bar');
+    let width = 0;
+
+    // بارگذاری با انیمیشن
+    const loadingInterval = setInterval(() => {
+        console.log(`Loading: ${width}%`); // اضافه کردن این خط
+        if (width >= 100) {
+            clearInterval(loadingInterval);
+            loadingPage.classList.remove('active'); // مخفی کردن صفحه لودینگ
+            loadingPage.style.display = 'none'; // مخفی کردن صفحه لودینگ
+            gamePage.classList.add('active'); // نمایش صفحه بازی
+        } else {
+            width++;
+            loadingBar.style.width = width + '%'; // به روز رسانی نوار لودینگ
+        }
+    }, 50); // زمان هر افزایش عرض نوار لودینگ
+});
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                contents.forEach(content => content.classList.remove('active'));
+                const targetTab = tab.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+    
+        copyReferralBtn.addEventListener('click', () => {
+            const referralLink = document.getElementById('referral-link');
+            navigator.clipboard.writeText(referralLink.innerText).then(() => {
+                alert('Referral link copied to clipboard!');
+            });
+        });
+    
+        function incrementPoints(event) {
+    if (energy <= 0) {
+        alert('warning out of energy');
+        return; // خروج از تابع اگر انرژی صفر است
+    }
+
+    points += 1; // افزایش امتیاز
+    clickCount++; // افزایش شمارش کلیک‌ها
+    document.getElementById('points-display').innerText = `point: ${points}`;
+    energy -= 1; // کاهش انرژی
+    document.getElementById('energy-bar').style.width = `${(energy / 1000) * 100}%`;
+    document.getElementById('energy-text').innerText = `${energy}/1000`;
+
+    // تغییر رنگ نوار انرژی در صورت کم بودن
+    if (energy < 200) {
+        document.getElementById('energy-bar').style.backgroundColor = 'red'; // رنگ کم انرژی
+    } else {
+        document.getElementById('energy-bar').style.backgroundColor = 'green'; // رنگ نرمال انرژی
+    }
+
+    // بررسی امتیاز شانسی
+    if (clickCount % bonusClickThreshold === 0) {
+        const bonusPoints = Math.floor(Math.random() * (70 - 20 + 1)) + 20; // مقدار امتیاز اضافی
+        points += bonusPoints; // افزایش امتیاز اضافی
+        energy -= bonusPoints; // کاهش انرژی به میزان دلخواه
+        document.getElementById('energy-bar').style.width = `${(energy / 1000) * 100}%`;
+        document.getElementById('energy-text').innerText = `${energy}/1000`;
+
+        // نشان دادن افزایش امتیاز اضافی
+        const pointPopup = document.createElement('div');
+        pointPopup.innerText = `+${bonusPoints} bounce point!`;
+        pointPopup.className = 'point-popup';
+        pointPopup.style.left = `${event.clientX}px`;
+        pointPopup.style.top = `${event.clientY}px`;
+        document.body.appendChild(pointPopup);
+
+        setTimeout(() => {
+            pointPopup.remove();
+        }, 1500);
+    }
+
+    // بررسی لول آپ
+    levelUpProgress += 1;
+    if (levelUpProgress >= levelUpPoints) {
+        levelUp();
+    }
+
+    // به روز رسانی نوار لول آپ
+    const levelUpBar = document.getElementById('level-up-bar');
+    levelUpBar.style.width = `${(levelUpProgress / levelUpPoints) * 100}%`;
+    document.getElementById('level-up-text').innerText = ` level up: ${Math.floor((levelUpProgress / levelUpPoints) * 100)}%`;
+
+    // نشان دادن افزایش امتیاز
+    const pointPopup = document.createElement('div');
+    pointPopup.innerText = "+1";
+    pointPopup.className = 'point-popup';
+    pointPopup.style.left = `${event.clientX}px`;
+    pointPopup.style.top = `${event.clientY}px`;
+    document.body.appendChild(pointPopup);
+
+    setTimeout(() => {
+        pointPopup.remove();
+    }, 1500);
+}
+        function levelUp() {
+            currentLevel += 1;
+            levelUpProgress = 0;
+            levelUpPoints *= 2; // افزایش مقدار مورد نیاز برای لول آپ بعدی
+            document.getElementById('user-level').innerText = `Level: ${currentLevel}`;
+            energy = 1000; // بازنشانی انرژی
+            document.getElementById('energy-bar').style.width = `100%`;
+            document.getElementById('energy-text').innerText = `1000/1000`;
+        }
+    </script>
+    
+</body>
+</html>

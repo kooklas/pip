@@ -1,2 +1,0 @@
-# kooklas.github.io
-kooklas
