@@ -15,12 +15,31 @@
             background-color: #f0f8ff;
             color: #333;
         }
-        #start-page, #game-page {
+         #start-page {
             display: none;
+            margin: 0px;
+            padding: 0px;
             justify-content: center;
             align-items: center;
             height: 100%;
         }
+        #game-page {
+            display: none;
+            margin: 0px;
+            padding: 0px;
+            justify-content:  space-between;
+            align-items: stretch;
+            height: 100%;
+        }
+        .points {
+    position: absolute; /* موقعیت مطلق */
+    top: 20px; /* فاصله از بالا */
+    left: 50%; /* تراز از وسط */
+    transform: translateX(-50%); /* تراز از وسط */
+    font-size: 24px; /* اندازه فونت */
+    font-weight: bold; /* ضخامت فونت */
+}
+
 
         #loading-page {
     display: none; /* ابتدا پنهان است */
@@ -99,7 +118,8 @@
             display: block;
         }
         .avatar {
-            position: absolute; /* تغییر به absolute */
+            position: relative; /* تغییر به absolute */
+            margin-top: 20px;
             top: 20px; /* فاصله از بالا */
             left: 20px; /* فاصله از چپ */
             border-radius: 50%;
@@ -115,15 +135,19 @@
             margin-top: 10px;
         }
         .bottom-info {
-            position: absolute;
-            bottom: 60px; /* فاصله از پایین */
-            left: 10px; /* فاصله از چپ */
-            display: flex;
-            align-items: center;
-            z-index: 5;
-            gap: 15px; /* فاصله بین عناصر */
-        }
+    position: absolute;
+    bottom: 2.5cm; /* فاصله از پایین */
+    left: 50%; /* تراز از وسط */
+    transform: translateX(-50%); /* تراز از وسط */
+    display: flex;
+    align-items: center;
+    gap: 15px; /* فاصله بین عناصر */
+    z-index: 5;
+}
+
+
         .energy-bar-container {
+            display: flex;
             width: 150px;
             height: 20px;
             background-color: #ddd;
@@ -135,9 +159,10 @@
             border-radius: 15px;
             transition: width 0.3s, background-color 0.3s;
         }
-        .points, .referral-points {
+        .points {
             font-size: 16px;
             margin-right: 15px;
+            margin-bottom: 10px;
         }
         .energy-text {
             position: absolute;
@@ -225,15 +250,14 @@
         <div class="content" id="game-tab" onclick="incrementPoints(event)">
             <div class="avatar" id="user-avatar"></div>
             <div class="level" id="user-level">Level: 1</div>
+            <div class="points" id="points-display">Balance: 0</div>
 
             <div class="bottom-info">
                 <div class="energy-bar-container">
                     <div class="energy-bar" id="energy-bar" style="width: 100%; background-color: green;"></div>
                     <div class="energy-text" id="energy-text">1000/1000</div>
                 </div>
-                <div class="points" id="points-display">Points: 0</div>
-                <div class="referral-points" id="referral-points-display">Referral Points: 0</div>
-            </div>
+                            </div>
 
             <div class="level-up-container">
                 <div class="level-up-bar" id="level-up-bar" style="width: 0%;"></div>
@@ -303,7 +327,6 @@
         let points = 0;
         let clickCount = 0; // شمارش کلیک‌ها
         const bonusClickThreshold = 5; // هر 5 کلیک یک امتیاز اضافی
-        let referralPoints = 0;
         let energy = 1000;
         let levelUpPoints = 1000;
         let currentLevel = 1;
@@ -355,7 +378,7 @@
 
     points += 1; // افزایش امتیاز
     clickCount++; // افزایش شمارش کلیک‌ها
-    document.getElementById('points-display').innerText = `point: ${points}`;
+    document.getElementById('points-display').innerText = `Balance: ${points}`;
     energy -= 1; // کاهش انرژی
     document.getElementById('energy-bar').style.width = `${(energy / 1000) * 100}%`;
     document.getElementById('energy-text').innerText = `${energy}/1000`;
